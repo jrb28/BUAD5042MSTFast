@@ -2,4 +2,4 @@ This folder contains information for the MST version of this assignment
 
 Before importing the database dump file, you will need to create a schema/database named mst_fast.
 
-The database contains data for one problem with 500 locations and the distances between each of the distinct 124,750 paris of locations.  A fast algorithm can compute the MST in a relatively few number of seconds.
+The database contains data for one problem with 500 locations and the distances between each of the distinct 124,750 paris of locations.  A fast algorithm can compute the MST in less than one second.
