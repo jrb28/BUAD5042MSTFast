@@ -1,4 +1,4 @@
-This folder contains data for the Binpacking version of this problem.
+This folder contains data for the Binpacking version of this assignment.
 
 Before importing the database you will need to create a schema/database named binpacking_fast.
 
