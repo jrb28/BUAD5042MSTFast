@@ -6,4 +6,4 @@ The database contains data for two problems.  The first problem has 20,000 items
 
 I've posed execution times for two algorithms: the first is a relatively simple approach and the second a more complex approach.  The execution times for the first algorithm are 15 seconds for the first problem and about 7 minutes for the second problem.  The latter algorithm has execution times of 0.757 seconds and 8.427 seconds.
 
-Please note that the execution times listed above are for only solving the binpacking problem.  The development environment will take longer to completely process your algorithm because it takes some time to evalaute your solution for feasibility.
+Please note that the execution times listed above are for only solving the binpacking problem.  The development environment will take longer to completely process your algorithm because it takes some time to evaluate your solution for feasibility.
