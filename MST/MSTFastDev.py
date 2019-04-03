@@ -5,13 +5,13 @@ Created on Thu Mar 02 17:54:49 2017
 @author: jrbrad
 """
 
-import MySQLdb as mySQL
+import mysql.connector as mySQL
 import time
 
 R = 6371.0 * 0.621371
 
 """ global MySQL settings """
-mysql_user_name = 'your MySQL username' #
+mysql_user_name = 'Your MySQL username' #
 mysql_password = 'Your MySQL password'   #
 mysql_ip = '127.0.0.1'
 mysql_db = 'mst_fast'
@@ -79,14 +79,25 @@ def mst_feasible(values,mst):
 def getDBDataList(commandString):
     cnx = db_connect()
     cursor = cnx.cursor()
-    cursor.execute(commandString)
+    cursor.callproc(commandString)
     items = []
-    x = cursor.fetchall()
-    for item in x:
-        new_row = []
-        for i in range(len(item)):
-            new_row.append(item[i])
-        items.append(new_row)
+    for result in cursor.stored_results():
+        for item in result.fetchall():
+            items.append(item[0])
+        break
+    cursor.close()
+    cnx.close()
+    return items
+    
+def getDBDataListArgs(commandString,args):
+    cnx = db_connect()
+    cursor = cnx.cursor()
+    cursor.callproc(commandString,args)
+    items = []
+    for result in cursor.stored_results():
+        for item in result.fetchall():
+            items.append(list(item))
+        break
     cursor.close()
     cnx.close()
     return items
@@ -94,11 +105,12 @@ def getDBDataList(commandString):
 def getDBDataList1(commandString):
     cnx = db_connect()
     cursor = cnx.cursor()
-    cursor.execute(commandString)
+    cursor.callproc(commandString)
     items = []
-    x = cursor.fetchall()
-    for item in x:
-        items.append(item[0])
+    for result in cursor.stored_results():
+        for item in result.fetchall():
+            items.append(item[0])
+        break
     cursor.close()
     cnx.close()
     return items
@@ -134,7 +146,7 @@ def mst_algo(locs,dist):
 
 
 """ This is the main program """
-problems = getDBDataList1('CALL spGetProblemIds();')
+problems = getDBDataList('spGetProblemIds')
 silent_mode = False
 """ Error Messages """
 error_locid = """ 
@@ -148,7 +160,8 @@ mst_algo() returned a response whose outer data type was not a list.  Scoring wi
 
 for problem_id in problems:
     """ locs = getDBDataList('CALL spGetProbData(%s);' % (str(problem_id))) """
-    data = getDBDataList('CALL spGetDist(%s);' % (str(problem_id)))
+    #data = getDBDataList('CALL spGetDist(%s);' % (str(problem_id)))
+    data = getDBDataListArgs('spGetDist',[problem_id])
     dist = {}
     loc_ids = []    
     for line in data:
@@ -182,7 +195,7 @@ for problem_id in problems:
     h = int(execTime/3600)
     m = int(execTime - h *3600)/60
     s = execTime - 3600 * h - 60 * m
-    myTime = '{:02d}'.format(h) + ':' + '{:02d}'.format(m) + ':' + '{:07.4f}'.format(s)
+    myTime = '{:02.0f}'.format(h) + ':' + '{:02.0f}'.format(m) + ':' + '{:07.4f}'.format(s)
     
     if isinstance(mst,list):
         for link in mst:
@@ -191,7 +204,7 @@ for problem_id in problems:
                 if silent_mode:
                     status = "bad_tuples_in_list"
                 else:
-                    print error_not_tuple
+                    print(error_not_tuple)
                 break
             else:
                 if not (link[0] in loc_ids and link[1] in loc_ids):
@@ -199,13 +212,13 @@ for problem_id in problems:
                     if silent_mode:
                         status = "bad_loc_id_"
                     else:
-                        print error_locid
+                        print(error_locid)
                     break
     else:
         if silent_mode:
             status = "P"+str(problem_id)+"_not_list_"
         else:
-            print error_response_not_list    
+            print(error_response_not_list)   
     
     if errors == False:
         mst_ok = mst_feasible(dist,mst)
@@ -218,17 +231,15 @@ for problem_id in problems:
             if silent_mode:
                 status = "P"+str(problem_id)+"mst_valid_"
             else:
-                print "(Fast) MST Problem ", str(problem_id)," solution valid, distance =", mst_obj
+                print("(Fast) MST Problem ", str(problem_id)," solution valid, distance =", mst_obj)
                 print('Execution time: ' + str(myTime))
         else:
             if silent_mode:
                 status = "P"+str(problem_id)+"mst_invalid_"
             else:
-                print "(Fast) MST Problem ", str(problem_id)," solution invalid ...."
+                print("(Fast) MST Problem ", str(problem_id)," solution invalid ....")
         
-    print
-    print "=========================================================="
-    print "MST Problem", str(problem_id)
-    print name_or_team, mst, mst_value(dist,mst)
-    print "MST feasible?", mst_feasible(dist,mst)
-    print
+    print ('\n',"==========================================================")
+    print("MST Problem", str(problem_id))
+    print(name_or_team, mst, mst_value(dist,mst))
+    print("MST feasible?", mst_feasible(dist,mst),'\n')
